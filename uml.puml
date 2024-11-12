@@ -1,0 +1,233 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' HTTP Server Components
+package "httpserver.http" {
+  enum Method {
+    GET
+    POST
+    PUT
+    DELETE
+  }
+
+  enum ContentType {
+    PLAIN_TEXT
+    JSON
+  }
+
+  enum HttpStatus {
+    OK
+    BAD_REQUEST
+    UNAUTHORIZED
+    NOT_FOUND
+    INTERNAL_SERVER_ERROR
+  }
+}
+
+package "httpserver.server" {
+  class Request {
+    - method: Method
+    - urlContent: String
+    - pathname: String
+    - headers: HeaderMap
+    - body: String
+  }
+
+  class Response {
+    - status: HttpStatus
+    - contentType: ContentType
+    - body: String
+  }
+
+  class HeaderMap {
+    - headers: Map<String, String>
+  }
+
+  class Server {
+    - port: int
+    - router: Router
+    + start()
+  }
+
+  interface Service {
+    + handleRequest(request: Request): Response
+  }
+}
+
+package "httpserver.utils" {
+  class Router {
+    - routes: Map<String, Service>
+    + addService(route: String, service: Service)
+    + resolve(route: String): Service
+  }
+}
+
+' Core Components
+package "application.core" {
+  class User {
+    - username: String
+    - password: String
+    - coins: int
+    - deck: Deck
+    - stack: CardStack
+  }
+
+  class Card {
+    - name: String
+    - damage: float
+    - elementType: ElementType
+  }
+
+  class MonsterCard {
+    - specialty: MonsterSpecialty
+  }
+
+  class SpellCard {}
+
+  enum ElementType {
+    FIRE
+    WATER
+    NORMAL
+  }
+
+  enum MonsterSpecialty {
+    GOBLIN
+    DRAGON
+    WIZZARD
+    ORK
+    KNIGHT
+    KRAKEN
+    FIRE_ELF
+  }
+
+  class Deck {
+    - cards: List<Card>
+  }
+
+  class CardStack {
+    - cards: List<Card>
+  }
+}
+
+' Battle System
+package "application.battle" {
+  class Battle {
+    - player1: User
+    - player2: User
+    + startBattle(): BattleLog
+  }
+
+  class BattleLog {
+    - logEntries: List<String>
+  }
+}
+
+' Trading System
+package "application.trading" {
+  class Trade {
+    - offeredCard: Card
+    - requiredType: Class<Card>
+    - requiredMinimumDamage: float
+  }
+
+  class TradingSystem {
+    - trades: List<Trade>
+    + addTrade(trade: Trade)
+    + acceptTrade(trade: Trade, offeringUser: User)
+  }
+}
+
+' Controllers
+package "application.controller" {
+  class Controller {}
+
+  class UserController {
+    + registerUser(request: Request): Response
+    + loginUser(request: Request): Response
+    + getProfile(request: Request): Response
+    + updateProfile(request: Request): Response
+  }
+
+  class CardController {
+    + acquirePackage(request: Request): Response
+    + defineDeck(request: Request): Response
+    + viewDeck(request: Request): Response
+  }
+
+  class BattleController {
+    + startBattle(request: Request): Response
+  }
+
+  class TradeController {
+    + createTrade(request: Request): Response
+    + acceptTrade(request: Request): Response
+  }
+}
+
+' Database System
+package "application.database" {
+  class DatabaseManager {
+    + getConnection(): Connection
+  }
+
+  class UnitOfWork {
+    - connection: Connection
+    + commitTransaction()
+    + rollbackTransaction()
+    + prepareStatement(sql: String): PreparedStatement
+  }
+
+  class DataAccessException {}
+
+  class UserRepository {
+    + saveUser(user: User)
+    + getUser(username: String): User
+  }
+
+  class CardRepository {
+    + getCardById(id: int): Card
+    + saveCard(card: Card)
+  }
+}
+
+' Score System
+package "application.score" {
+  class ScoreBoard {
+    - scores: Map<User, int>
+    + updateScore(user: User, delta: int)
+    + getScore(user: User): int
+  }
+}
+
+' Relationships
+Request --> Method
+Request --> HeaderMap
+Request --> Response
+Response --> HttpStatus
+Response --> ContentType
+Router --> Service
+Server --> Router
+Server --> Request
+User --> Deck
+User --> CardStack
+Card --> ElementType
+MonsterCard --> MonsterSpecialty
+CardStack --> Card
+Deck --> Card
+Battle --> User
+Battle --> BattleLog
+Trade --> Card
+TradingSystem --> Trade
+TradingSystem --> User
+Controller <|-- UserController
+Controller <|-- CardController
+Controller <|-- BattleController
+Controller <|-- TradeController
+UnitOfWork --> DatabaseManager
+UnitOfWork --> DataAccessException
+UserRepository --> UnitOfWork
+CardRepository --> UnitOfWork
+CardRepository --> Card
+ScoreBoard --> User
+
+@enduml
