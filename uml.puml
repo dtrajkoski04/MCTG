@@ -89,82 +89,84 @@ package "httpserver" {
     }
 }
 
-
 package "application" {
 
-    package "controller" {
-        class Card {
-        }
-
-        class Deck {
-        }
-
-        class GameStats {
-        }
-
-        class Package {
-        }
-
-        class TradeDeal {
-        }
-
-        class User {
-        }
-    }
-
     package "model" {
-        class Card {
+        abstract class Card {
+            - id: String
+            - name: String
+            - damage: int
+            - elementType: String
+            +getId(): String
+            +setId(id: String)
+            +getName(): String
+            +setName(name: String)
+            +getDamage(): int
+            +setDamage(damage: int)
+            +getElementType(): String
+            +setElementType(elementType: String)
+            +canAttack(opponent: Card): boolean
+        }
+
+        class MonsterCard extends Card {
+            +canAttack(opponent: Card): boolean
+        }
+
+        class SpellCard extends Card {
+            +canAttack(opponent: Card): boolean
         }
 
         class Deck {
-
+            - cards: List<Card>
+            +addCard(card: Card): boolean
+            +removeCard(card: Card): boolean
+            +getCards(): List<Card>
+            +isValid(): boolean
         }
 
         class GameStats {
+            - gamesPlayed: int
+            - elo: int
+            +updateStats(won: boolean)
+            +getGamesPlayed(): int
+            +getElo(): int
         }
 
         class Package {
+            - id: String
+            - cards: List<Card>
+            +getId(): String
+            +getCards(): List<Card>
+            +openPackage(): List<Card>
         }
 
         class TradeDeal {
+            - offeredCard: Card
+            - requiredType: String
+            - minimumDamage: int
+            +isAcceptable(offeredCard: Card): boolean
         }
 
         class User {
-        }
-    }
-
-    package "service" {
-        class CardService {
-        }
-
-        class GameService {
-        }
-
-        class PackageService {
-        }
-
-        class TradeService {
+            - username: String
+            - password: String
+            - coins: int
+            - stack: List<Card>
+            - deck: Deck
+            - stats: GameStats
+            +acquireCard(card: Card): boolean
+            +buyPackage(packageCards: List<Card>): boolean
+            +defineDeck(cards: List<Card>): boolean
+            +getELO(): int
+            +getDeck(): Deck
+            +getStack(): List<Card>
         }
 
-        class UserService {
-        }
-    }
-
-    package "dal" {
-        class CardRepository {
-        }
-
-        class PackageRepository {
-        }
-
-        class TradeRepository {
-        }
-
-        class UserMemoryRepository {
-        }
-
-        interface UserMemoryRepository {
-        }
+        Deck "1" -- "4" Card
+        User "1" -- "1" Deck
+        User "1" -- "1" GameStats
+        Package "1" -- "5" Card
+        TradeDeal "1" -- "1" Card
     }
 }
 
