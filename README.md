@@ -14,7 +14,3 @@ Getting Started
 
 1. Clone the repository:
 `git clone https://github.com/yourusername/mtcg.git`
-2. Set up the database using the provided PostgreSQL initialization script.
-3. Run the server:
-`mvn exec:java`
-4. Test the API using provided CURL scripts or your preferred tool (e.g., Postman).
